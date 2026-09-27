@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://sss327-ai.github.io/legen/sitemap.xml

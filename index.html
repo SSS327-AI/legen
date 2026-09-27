@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#e8efe8">
+  <meta name="description" content="免费在线玩追逐射击小游戏：扮演警员躲避匪徒、发射追踪子弹、升级武器并挑战生存极限。支持电脑键盘和手机触控。">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="https://sss327-ai.github.io/legen/">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:title" content="追逐射击小游戏 | FIELD TEST">
+  <meta property="og:description" content="免费在线玩追逐射击小游戏，躲避匪徒、射击升级，挑战生存极限。">
+  <meta property="og:url" content="https://sss327-ai.github.io/legen/">
+  <meta name="twitter:card" content="summary">
+  <title>追逐射击小游戏：在线躲避与射击 | FIELD TEST</title>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "VideoGame",
+      "name": "追逐射击小游戏",
+      "url": "https://sss327-ai.github.io/legen/",
+      "description": "免费在线玩追逐射击小游戏：扮演警员躲避匪徒、发射追踪子弹、升级武器并挑战生存极限。",
+      "genre": ["动作游戏", "射击游戏", "生存游戏"],
+      "gamePlatform": ["Web browser", "Mobile browser"],
+      "applicationCategory": "Game"
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="game.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="wordmark" href="#top" aria-label="返回游戏首页">
+        <span class="wordmark-icon">F</span>
+        <span>FIELD TEST <span class="wordmark-divider">/</span> ARCADE</span>
+      </a>
+      <div class="topbar-tools">
+        <button class="sound-toggle" id="soundToggle" type="button" aria-pressed="true" aria-label="关闭音效">
+          <span class="sound-icon" aria-hidden="true">♪</span><span id="soundLabel">音效开</span>
+        </button>
+        <div class="connection"><span class="connection-dot"></span><span id="phase-label">待命中</span></div>
+      </div>
+    </header>
+
+    <main id="top">
+      <section class="intro" aria-labelledby="game-title">
+        <div>
+          <p class="eyebrow"><span>训练场 01</span><span class="eyebrow-line"></span><span>生存测试</span></p>
+          <h1 id="game-title">追逐<span>射击</span></h1>
+          <p class="subtitle">躲开追兵，抓住每次反击的机会。</p>
+        </div>
+        <div class="round-mark" aria-hidden="true"><span>RUN</span><strong>01</strong></div>
+      </section>
+
+      <section class="game-layout" aria-label="追逐射击游戏">
+        <div class="arena-column">
+          <div class="arena-frame">
+            <div class="arena-topline"><span><i></i> LIVE ARENA</span><span>1000 <b>×</b> 700</span></div>
+            <canvas id="gameCanvas" width="1000" height="700" aria-label="追逐射击游戏场地"></canvas>
+            <div class="arena-bottomline"><span>警员 <b>01</b></span><span>匪徒生命 <b id="red-health">20</b></span><span>射手 <b id="shooter-count">0</b></span><span>警戒 <b id="threat-level">LOW</b></span></div>
+          </div>
+          <div class="arena-caption"><span>扮演警员躲避匪徒，空格键朝移动方向射击。</span><span>边界不可穿越</span></div>
+        </div>
+
+        <aside class="sidebar" aria-label="游戏状态和控制">
+          <section class="health-section">
+            <div class="section-heading"><span>警员状态</span><span class="micro-label">VITALS / 01</span></div>
+            <div class="health-reading"><span>生命值</span><strong id="playerHealthText">100 <small>/ 100</small></strong></div>
+            <div class="health-track"><div class="player-health-bar" id="playerHealthBar"></div></div>
+            <div class="experience-heading"><span>等级 <b id="player-level">1</b></span><span><b id="experience">0</b> / <b id="experience-needed">5</b> EXP</span></div>
+            <div class="experience-track"><div id="experienceBar"></div></div>
+          </section>
+
+          <section class="metrics" aria-live="polite">
+            <div class="metric"><span class="metric-label">存活时间</span><strong><span id="time">0</span><small>秒</small></strong></div>
+            <div class="metric"><span class="metric-label">匪徒数量</span><strong><span id="aiCount">1</span><small>个</small></strong></div>
+            <div class="metric"><span class="metric-label">被逮次数</span><strong><span id="catchCount">0</span><small>次</small></strong></div>
+            <div class="metric"><span class="metric-label">击倒匪徒</span><strong><span id="killCount">0</span><small>个</small></strong></div>
+          </section>
+
+          <section class="control-section">
+            <div class="section-heading"><span>任务控制</span><span class="micro-label">CONTROL</span></div>
+            <button class="button button-primary" id="startButton" type="button">开始任务 <span aria-hidden="true">↗</span></button>
+            <div class="button-pair">
+              <button class="button button-secondary" id="pauseButton" type="button" disabled>暂停</button>
+              <button class="button button-secondary" id="restartButton" type="button">重新开始</button>
+            </div>
+          </section>
+
+          <section class="keyboard-section">
+            <div class="section-heading"><span>操作方式</span><span class="micro-label">INPUT</span></div>
+            <div class="instruction-row"><span>移动</span><span class="key-set"><kbd>↑</kbd><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd></span></div>
+            <div class="instruction-row"><span>射击</span><kbd class="wide-key">SPACE</kbd></div>
+          </section>
+
+          <div class="mobile-controls" aria-label="触屏操作">
+            <div class="dpad">
+              <button class="direction-button" data-key="ArrowUp" style="grid-area: 1 / 2" type="button" aria-label="向上">↑</button>
+              <button class="direction-button" data-key="ArrowLeft" style="grid-area: 2 / 1" type="button" aria-label="向左">←</button>
+              <button class="direction-button" data-key="ArrowDown" style="grid-area: 2 / 2" type="button" aria-label="向下">↓</button>
+              <button class="direction-button" data-key="ArrowRight" style="grid-area: 2 / 3" type="button" aria-label="向右">→</button>
+            </div>
+            <button class="fire-button" id="fireButton" type="button"><span>FIRE</span><strong>发射</strong></button>
+          </div>
+        </aside>
+      </section>
+    </main>
+
+    <section class="levelup-backdrop" id="levelupDialog" role="dialog" aria-modal="true" aria-labelledby="levelup-title" hidden>
+      <div class="levelup-panel">
+        <p class="levelup-eyebrow">FIELD UPGRADE / LV.<span id="upgrade-level">2</span></p>
+        <h2 id="levelup-title">选择一项升级</h2>
+        <p class="levelup-description">任务已暂停。选定奖励后继续行动。</p>
+        <div class="upgrade-options">
+          <button class="upgrade-option" data-upgrade="damage" type="button">
+            <span class="upgrade-index">01 / DAMAGE</span><strong>强化弹头</strong><span>每发子弹伤害 +2</span>
+          </button>
+          <button class="upgrade-option" data-upgrade="speed" type="button">
+            <span class="upgrade-index">02 / VELOCITY</span><strong>高速弹药</strong><span>子弹速度 +0.4</span>
+          </button>
+          <button class="upgrade-option" data-upgrade="multishot" type="button">
+            <span class="upgrade-index">03 / MULTI-SHOT</span><strong>扩散射击</strong><span>子弹数量 +1，每发伤害 -20%</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <span>FIELD TEST <i>•</i> SURVIVAL PROTOCOL</span>
+      <span>30 击杀解锁射手 <i>•</i> 50 击杀追加一名 <i>•</i> 敌弹伤害 3</span>
+    </footer>
+  </div>
+  <script src="game.js" defer></script>
+</body>
+</html>
